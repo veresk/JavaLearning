@@ -1,4 +1,4 @@
-package ru.javaLerning.lesson1;
+package ru.javaLearning.lesson1;
 
 public class MainApp {
     public static void main(String[] args) {

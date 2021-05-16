@@ -1,4 +1,4 @@
-package ru.javaLerning.lesson1;
+package ru.javaLearning.lesson1;
 
 public abstract class AbleToUseTransport {
     private Transport currentTransport;
