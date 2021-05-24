@@ -11,6 +11,7 @@ public class MainApp {
     }
 
     static final int SIZE = 100_000_000;
+    static final int THREADS_COUNT = 3;
 
     private static void method1() {
         var arr = createArr();
@@ -27,7 +28,7 @@ public class MainApp {
     private static void method2() {
         var arr = createArr();
 
-        var time = measure(() -> method2Internal(arr, 1000));
+        var time = measure(() -> method2Internal(arr, THREADS_COUNT));
 
         System.out.println(time);
     }
@@ -35,20 +36,31 @@ public class MainApp {
     private static void method2Internal(float[] arr, int threadsCount) {
         var service = Executors.newFixedThreadPool(threadsCount);
 
-        for (int i = 0; i < SIZE; i++) {
+        for (int i = 0; i < threadsCount; i++) {
+            int partSize = SIZE / threadsCount + 1;
 
-            int fi = i;
+            var skip = i * partSize;
 
-            service.execute(() -> arr[fi] = calculate(arr, fi));
+            int take = partSize;
+
+            if (i == threadsCount - 1) take = SIZE - skip;
+
+            int finalTake = take;
+
+            service.execute(() -> calculateForArrPart(arr, skip, finalTake));
         }
 
         service.shutdown();
 
         try {
-            service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            service.awaitTermination(10, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void calculateForArrPart(float[] arr, int skip, int take) {
+        for (int i = skip; i < skip + take; i++) arr[i] = calculate(arr, i);
     }
 
     private static float[] createArr() {
